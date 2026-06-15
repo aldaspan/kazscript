@@ -1,0 +1,8 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="60" cy="60" r="58" fill="#1B3A6B"/>
+  <path d="M 20 60 A 40 40 0 0 1 100 60" fill="none" stroke="white" stroke-width="4" stroke-dasharray="6 4" stroke-linecap="butt"/>
+  <path d="M 100 60 A 40 40 0 0 1 20 60" fill="none" stroke="#C9A84C" stroke-width="4" stroke-dasharray="6 4" stroke-linecap="butt"/>
+  <text x="60" y="76" text-anchor="middle" font-family="'Arial Unicode MS', 'Noto Naskh Arabic', 'Scheherazade New', serif" font-size="64" fill="white" direction="rtl">ں</text>
+  <circle cx="60" cy="82" r="6" fill="#1B3A6B"/>
+  <circle cx="60" cy="82" r="4" fill="#C9A84C"/>
+</svg>
