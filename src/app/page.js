@@ -84,10 +84,11 @@ export default function Home() {
             onChange={handleInput}
             placeholder={isCyr2Tote ? 'Қазақша мәтін енгізіңіз...' : 'Төте жазу мәтінін енгізіңіз...'}
             className="w-full h-56 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] 
-                       border border-[#2a4f8a] rounded-xl p-4 resize-none 
-                       focus:outline-none focus:border-[#C9A84C] transition-colors
-                       text-base leading-relaxed"
+                      border border-[#2a4f8a] rounded-xl p-4 resize-none 
+                      focus:outline-none focus:border-[#C9A84C] transition-colors
+                      text-base leading-relaxed"
             dir={isCyr2Tote ? 'ltr' : 'rtl'}
+            style={!isCyr2Tote ? { fontFamily: 'AlkatipBasma', fontSize: '20px' } : {}}
           />
           {/* Таңба санауышы */}
           <div className="flex justify-end mt-2">
@@ -107,10 +108,11 @@ export default function Home() {
             readOnly
             placeholder="Нәтиже осында шығады..."
             className="w-full h-56 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] 
-                       border border-[#2a4f8a] rounded-xl p-4 resize-none 
-                       focus:outline-none focus:border-[#C9A84C] transition-colors
-                       text-base leading-relaxed"
+                      border border-[#2a4f8a] rounded-xl p-4 resize-none 
+                      focus:outline-none focus:border-[#C9A84C] transition-colors
+                      text-base leading-relaxed"
             dir={isCyr2Tote ? 'rtl' : 'ltr'}
+            style={isCyr2Tote ? { fontFamily: 'AlkatipBasma', fontSize: '20px' } : {}}
           />
           {/* Көшіру батырмасы */}
           <div className="flex justify-end mt-2">
