@@ -82,7 +82,7 @@ export default function Home() {
           <textarea
             value={inputText}
             onChange={handleInput}
-            placeholder={isCyr2Tote ? 'Қазақша мәтін енгізіңіз...' : 'Төте жазу мәтінін енгізіңіз...'}
+            placeholder={isCyr2Tote ? 'Қазақша мәтін енгізіңіз...' : 'توتە جازۋ ءماتىنىن ەنگىزىڭىز...'}
             className="w-full h-56 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] 
                       border border-[#2a4f8a] rounded-xl p-4 resize-none 
                       focus:outline-none focus:border-[#C9A84C] transition-colors
@@ -106,7 +106,7 @@ export default function Home() {
           <textarea
             value={outputText}
             readOnly
-            placeholder="Нәтиже осында шығады..."
+            placeholder={isCyr2Tote ? 'ناتيجە وسىندا كورىنەدى...' : 'Нәтиже осында шығады...'}
             className="w-full h-56 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] 
                       border border-[#2a4f8a] rounded-xl p-4 resize-none 
                       focus:outline-none focus:border-[#C9A84C] transition-colors
