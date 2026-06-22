@@ -112,6 +112,16 @@ const prepared = splitUlyQyzy(lower);
 // МАҢЫЗДЫ: ұзын таңбалар алдымен тұруы керек!
 // ============================================================
 const arabicToCyrillicMap = [
+
+  // Дифтонгтар (алдымен!)
+  ['اي', 'ай'],
+  ['ەي', 'ей'],
+  ['وي', 'ой'],
+  ['ۇي', 'ұй'],
+  ['ۋي', 'уй'],
+  ['ءوي', 'өй'],
+  ['ءۇي', 'үй'],
+
   // Екі таңбалы төте жазу таңбалары (алдымен!)
   ['ءا', 'ә'],
   ['ءى', 'і'],
@@ -173,15 +183,10 @@ const thickToThin = {
   'ы': 'і',
 };
 
-const thinIndicators = new Set(['е', 'к', 'г', 'ө', 'ү', 'і', 'ә']);
+const thinIndicators = new Set(['е', 'ө', 'ү', 'ә']);
 
 function applyVowelHarmony(word) {
-  const hasThin = [...word].some(c => thinIndicators.has(c));
-  if (!hasThin) return word;
-
-  return [...word]
-    .map(c => thickToThin[c] ?? c)
-    .join('');
+  return word;
 }
 
 // ============================================================
@@ -190,22 +195,25 @@ function applyVowelHarmony(word) {
 export function toteToCyrillic(text) {
   if (!text) return '';
 
-  return text
+ let result = text;
+
+for (const [arabic, cyrillic] of arabicToCyrillicMap) {
+  result = result.replaceAll(arabic, cyrillic);
+}
+
+  result = result
     .split(/(\s+)/)
     .map(token => {
       if (/^\s+$/.test(token)) return token;
-
-      let result = token;
-      for (const [arabic, cyrillic] of arabicToCyrillicMap) {
-        result = result.replaceAll(arabic, cyrillic);
-      }
-
-      // Үндестік ережесін қолдан
-      result = applyVowelHarmony(result);
-
-      return result;
+      return applyVowelHarmony(token);
     })
     .join('');
+
+  result = result.replace(/и$/u, 'й');
+  result = result.replace(/и(\s)/gu, 'й$1');
+
+
+  return result;
 }
 
 // ============================================================
@@ -213,4 +221,40 @@ export function toteToCyrillic(text) {
 // ============================================================
 export function countChars(text) {
   return text.replace(/\s/g, '').length;
+}
+
+
+// ============================================================
+// Өздігінен үйрену жүйесі — жұп сақтау
+// ============================================================
+
+/**
+ * Кирилл→Төте жұптарын localStorage-ке сақтайды
+ * @param {string} cyrillicWord
+ * @param {string} arabicWord
+ */
+export function savePair(cyrillicWord, arabicWord) {
+  if (typeof window === 'undefined') return;
+  try {
+    const pairs = JSON.parse(localStorage.getItem('kz_pairs') || '{}');
+    pairs[arabicWord] = cyrillicWord;
+    localStorage.setItem('kz_pairs', JSON.stringify(pairs));
+  } catch (e) {
+    console.error('savePair қатесі:', e);
+  }
+}
+
+/**
+ * Төте жазу сөзін сөздіктен іздейді
+ * @param {string} arabicWord
+ * @returns {string|null}
+ */
+export function lookupPair(arabicWord) {
+  if (typeof window === 'undefined') return null;
+  try {
+    const pairs = JSON.parse(localStorage.getItem('kz_pairs') || '{}');
+    return pairs[arabicWord] || null;
+  } catch (e) {
+    return null;
+  }
 }

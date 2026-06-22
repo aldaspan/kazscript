@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { cyrillicToTote, toteToCyrillic, countChars } from '@/lib/converter';
+import { cyrillicToTote, toteToCyrillic, countChars, savePair, lookupPair } from '@/lib/converter';
 
 const MAX_CHARS = 5000;
 
@@ -18,14 +18,37 @@ export default function Home() {
     setCharCount(countChars(val));
   }
 
-  function handleConvert() {
-    if (!inputText.trim()) return;
-    if (direction === 'cyr2tote') {
-      setOutputText(cyrillicToTote(inputText));
-    } else {
-      setOutputText(toteToCyrillic(inputText));
-    }
+function handleConvert() {
+  if (!inputText.trim()) return;
+
+  if (direction === 'cyr2tote') {
+    // Кирилл → Төте: сөзбе-сөз жұп сақтаймыз
+    const words = inputText.trim().split(/\s+/);
+    words.forEach(word => {
+      const cyrWord = word.toLowerCase().replace(/[^а-яәіңғүұқөһ]/gi, '');
+      if (cyrWord.length > 1) {
+        const arabicWord = cyrillicToTote(cyrWord);
+        savePair(cyrWord, arabicWord);
+      }
+    });
+    setOutputText(cyrillicToTote(inputText));
+
+  } else {
+    // Төте → Кирилл: алдымен сөздіктен іздейміз
+    const words = inputText.trim().split(/\s+/);
+    const converted = words.map(word => {
+      const lookup = lookupPair(word);
+      return lookup || toteToCyrillic(word);
+    }).join(' ');
+
+    let result = converted.trimStart();
+    result = result.charAt(0).toUpperCase() + result.slice(1);
+    result = result.replace(/([.!?]\s+|\n)([а-яәіңғүұқөһ])/gu,
+      (match, p1, p2) => p1 + p2.toUpperCase()
+    );
+    setOutputText(result);
   }
+}
 
   function handleSwap() {
     const newDir = direction === 'cyr2tote' ? 'tote2cyr' : 'cyr2tote';
