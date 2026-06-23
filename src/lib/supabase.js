@@ -9,17 +9,30 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  * Сөздік жұптарын Supabase-ке сақтайды
  */
 export async function savePairToSupabase(cyrillic, arabic) {
+  // Тым қысқа сөздерді өткізіп жібер
+  if (cyrillic.length < 2) return;
+  
   const { error } = await supabase
     .from('word_pairs')
     .upsert(
-      { cyrillic, arabic, usage_count: 1 },
-      {
-        onConflict: 'cyrillic,arabic',
-        ignoreDuplicates: false,
-      }
+      { cyrillic, arabic },
+      { onConflict: 'cyrillic,arabic', ignoreDuplicates: true }
     );
 
-  if (error) console.error('savePairToSupabase қатесі:', error);
+  if (error && error.code !== '23505') {
+    console.error('savePairToSupabase қатесі:', JSON.stringify(error));
+  }
+}
+
+// Жұптарды топтап сақтайды (batch)
+export async function savePairsBatch(pairs) {
+  if (!pairs.length) return;
+  
+  const { error } = await supabase
+    .from('word_pairs')
+    .upsert(pairs, { onConflict: 'cyrillic,arabic', ignoreDuplicates: true });
+
+  if (error) console.error('savePairsBatch қатесі:', JSON.stringify(error));
 }
 
 /**

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { cyrillicToTote, toteToCyrillic, countChars, savePair, lookupPair } from '@/lib/converter';
-import { savePairToSupabase, lookupPairFromSupabase, supabase } from '@/lib/supabase';
+import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, supabase } from '@/lib/supabase';
 
-const MAX_CHARS = 5000;
+const GUEST_MAX_CHARS = 5000;
+const FREE_MAX_CHARS = 10000;
 
 export default function Home() {
   const [inputText, setInputText] = useState('');
@@ -30,26 +31,32 @@ export default function Home() {
     setUser(null);
   }
 
-  function handleInput(e) {
-    const val = e.target.value;
-    if (countChars(val) > MAX_CHARS) return;
-    setInputText(val);
-    setCharCount(countChars(val));
-  }
+function handleInput(e) {
+  const val = e.target.value;
+  const maxChars = user ? FREE_MAX_CHARS : GUEST_MAX_CHARS;
+  if (countChars(val) > maxChars) return;
+  setInputText(val);
+  setCharCount(countChars(val));
+}
 
   async function handleConvert() {
     if (!inputText.trim()) return;
 
     if (direction === 'cyr2tote') {
       const words = inputText.trim().split(/\s+/);
+      const pairs = [];
+      
       words.forEach(word => {
         const cyrWord = word.toLowerCase().replace(/[^а-яәіңғүұқөһ]/gi, '');
         if (cyrWord.length > 1) {
           const arabicWord = cyrillicToTote(cyrWord);
           savePair(cyrWord, arabicWord);
-          savePairToSupabase(cyrWord, arabicWord);
+          pairs.push({ cyrillic: cyrWord, arabic: arabicWord });
         }
       });
+      
+      // Барлық жұптарды бір сұранысымен жіберу
+      savePairsBatch(pairs);
       setOutputText(cyrillicToTote(inputText));
 
     } else {
@@ -158,9 +165,9 @@ export default function Home() {
             style={!isCyr2Tote ? { fontFamily: 'AlkatipBasma', fontSize: '20px' } : {}}
           />
           <div className="flex justify-end mt-2">
-            <span className={`text-xs ${charCount > MAX_CHARS * 0.9 ? 'text-red-400' : 'text-[#4a6fa5]'}`}>
-              {charCount} / {MAX_CHARS}
-            </span>
+          <span className={`text-xs ${charCount > (user ? FREE_MAX_CHARS : GUEST_MAX_CHARS) * 0.9 ? 'text-red-400' : 'text-[#4a6fa5]'}`}>
+            {charCount} / {user ? FREE_MAX_CHARS : GUEST_MAX_CHARS}
+          </span>
           </div>
         </div>
 
