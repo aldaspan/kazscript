@@ -91,6 +91,35 @@ function handleInput(e) {
     setCharCount(countChars(outputText));
   }
 
+  const [fileResult, setFileResult] = useState('');
+
+async function handleFileConvert(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('direction', direction);
+
+  try {
+    const response = await fetch(`http://localhost:8000/convert/txt?direction=${direction}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      alert(err.detail);
+      return;
+    }
+
+    const result = await response.text();
+    setFileResult(result);
+  } catch (error) {
+    alert('Сервермен байланыс жоқ');
+  }
+}
+
   const isCyr2Tote = direction === 'cyr2tote';
 
   return (
@@ -213,6 +242,48 @@ function handleInput(e) {
       >
         Түрлендіру
       </button>
+
+{/* Файл конвертер — тек тіркелген пайдаланушы */}
+{user && (
+  <div className="mt-6 w-full max-w-4xl">
+    <div className="border border-[#2a4f8a] rounded-xl p-4 bg-[#1B3A6B]">
+      <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-3 font-medium">
+        .txt файл конвертері
+      </p>
+      <div className="flex items-center gap-3">
+        <input
+          type="file"
+          accept=".txt"
+          onChange={handleFileConvert}
+          className="text-sm text-white file:mr-3 file:py-1.5 file:px-4 
+                     file:rounded-full file:border-0 file:text-sm file:font-medium
+                     file:bg-[#C9A84C] file:text-[#0F2347] hover:file:bg-[#e0bc5e]
+                     cursor-pointer"
+        />
+        {fileResult && (
+          <button
+            onClick={() => {
+              const blob = new Blob([fileResult], { type: 'text/plain' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'converted.txt';
+              a.click();
+            }}
+            className="text-xs text-[#C9A84C] border border-[#C9A84C] 
+                       px-3 py-1.5 rounded-full hover:bg-[#C9A84C] 
+                       hover:text-[#0F2347] transition-colors"
+          >
+            ⬇ Жүктеу
+          </button>
+        )}
+      </div>
+      {fileResult && (
+        <p className="text-green-400 text-xs mt-2">✓ Файл сәтті түрлендірілді!</p>
+      )}
+    </div>
+  </div>
+)}
 
     </main>
   );
