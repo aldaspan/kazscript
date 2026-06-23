@@ -48,3 +48,41 @@ export async function lookupPairFromSupabase(arabic) {
   if (error) return null;
   return data?.cyrillic || null;
 }
+
+/**
+ * Конвертер тарихын сақтайды (тек тіркелген пайдаланушы)
+ */
+export async function saveConversionHistory(userId, inputText, outputText, direction) {
+  if (!userId) return;
+
+  const { error } = await supabase
+    .from('conversion_history')
+    .insert({
+      user_id: userId,
+      input_text: inputText,
+      output_text: outputText,
+      direction: direction,
+    });
+
+  if (error) console.error('saveConversionHistory қатесі:', JSON.stringify(error));
+}
+
+/**
+ * Пайдаланушының конвертер тарихын алады
+ */
+export async function getConversionHistory(userId) {
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from('conversion_history')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    console.error('getConversionHistory қатесі:', JSON.stringify(error));
+    return [];
+  }
+  return data || [];
+}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { cyrillicToTote, toteToCyrillic, countChars, savePair, lookupPair } from '@/lib/converter';
-import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, supabase } from '@/lib/supabase';
+import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, saveConversionHistory, supabase } from '@/lib/supabase';
 
 const GUEST_MAX_CHARS = 5000;
 const FREE_MAX_CHARS = 10000;
@@ -58,6 +58,8 @@ function handleInput(e) {
       // Барлық жұптарды бір сұранысымен жіберу
       savePairsBatch(pairs);
       setOutputText(cyrillicToTote(inputText));
+      // Тарихты сақтау
+      saveConversionHistory(user?.id, inputText, cyrillicToTote(inputText), 'cyr2tote'); 
 
     } else {
       const words = inputText.trim().split(/\s+/);
@@ -76,6 +78,8 @@ function handleInput(e) {
         (match, p1, p2) => p1 + p2.toUpperCase()
       );
       setOutputText(result);
+      // Тарихты сақтау
+      saveConversionHistory(user?.id, inputText, result, 'tote2cyr');
     }
   }
 
