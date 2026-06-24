@@ -97,27 +97,45 @@ async function handleFileConvert(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('direction', direction);
+  // Файл көлемін тексеру (500 KB)
+  const MAX_FILE_SIZE = 500 * 1024;
+  if (file.size > MAX_FILE_SIZE) {
+    alert('Файл көлемі 500 KB-тан аспауы керек!');
+    return;
+  }
 
-  try {
-    const response = await fetch(`http://localhost:8000/convert/txt?direction=${direction}`, {
-      method: 'POST',
-      body: formData,
-    });
+  // Файлды браузерде оқу
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const text = event.target.result;
 
-    if (!response.ok) {
-      const err = await response.json();
-      alert(err.detail);
-      return;
+    // Фронтенд алгоритмімен түрлендіру
+    let result;
+    if (direction === 'cyr2tote') {
+      // Жұптарды сақтау
+      const words = text.trim().split(/\s+/);
+      const pairs = [];
+      words.forEach(word => {
+        const cyrWord = word.toLowerCase().replace(/[^а-яәіңғүұқөһ]/gi, '');
+        if (cyrWord.length > 1) {
+          const arabicWord = cyrillicToTote(cyrWord);
+          pairs.push({ cyrillic: cyrWord, arabic: arabicWord });
+        }
+      });
+      savePairsBatch(pairs);
+      result = cyrillicToTote(text);
+    } else {
+      result = toteToCyrillic(text);
+      result = result.trimStart();
+      result = result.charAt(0).toUpperCase() + result.slice(1);
+      result = result.replace(/([.!?]\s+|\n)([а-яәіңғүұқөһ])/gu,
+        (match, p1, p2) => p1 + p2.toUpperCase()
+      );
     }
 
-    const result = await response.text();
     setFileResult(result);
-  } catch (error) {
-    alert('Сервермен байланыс жоқ');
-  }
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
   const isCyr2Tote = direction === 'cyr2tote';
