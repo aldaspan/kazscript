@@ -55,3 +55,54 @@ async def convert_txt(
         converted = tote_to_cyrillic(text)
 
     return PlainTextResponse(content=converted, media_type="text/plain; charset=utf-8")
+
+
+from docx import Document
+from docx.shared import Pt
+import io
+
+MAX_PREMIUM_SIZE = 10 * 1024 * 1024  # 10 MB
+
+@app.post("/convert/docx")
+async def convert_docx(
+    file: UploadFile = File(...),
+    direction: str = "cyr2tote"
+):
+    # Файл форматын тексеру
+    if not file.filename.endswith('.docx'):
+        raise HTTPException(status_code=400, detail="Тек .docx файлдары қабылданады")
+
+    # Файл көлемін тексеру
+    contents = await file.read()
+    if len(contents) > MAX_PREMIUM_SIZE:
+        raise HTTPException(status_code=400, detail="Файл көлемі 10 MB-тан аспауы керек")
+
+    # .docx файлын оқу
+    doc = Document(io.BytesIO(contents))
+    new_doc = Document()
+
+    # Әр параграфты түрлендіру
+    for para in doc.paragraphs:
+        new_para = new_doc.add_paragraph()
+        new_para.style = new_doc.styles['Normal']
+        
+        if para.text.strip():
+            if direction == "cyr2tote":
+                converted_text = cyrillic_to_tote(para.text)
+            else:
+                converted_text = tote_to_cyrillic(para.text)
+            new_para.add_run(converted_text)
+        else:
+            new_para.add_run('')
+
+    # Жаңа .docx файлын жіберу
+    output = io.BytesIO()
+    new_doc.save(output)
+    output.seek(0)
+
+    from fastapi.responses import StreamingResponse
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename=converted.docx"}
+    )

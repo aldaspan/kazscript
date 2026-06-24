@@ -83,6 +83,53 @@ function handleInput(e) {
     }
   }
 
+const [docxStatus, setDocxStatus] = useState('');
+
+async function handleDocxConvert(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Файл көлемін тексеру (10 MB)
+  const MAX_DOCX_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_DOCX_SIZE) {
+    alert('Файл көлемі 10 MB-тан аспауы керек!');
+    return;
+  }
+
+  setDocxStatus('Түрлендірілуде...');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(`http://localhost:8000/convert/docx?direction=${direction}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      alert(err.detail);
+      setDocxStatus('');
+      return;
+    }
+
+    // Файлды жүктеу
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'converted.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    setDocxStatus('✓ Файл сәтті түрлендірілді!');
+  } catch (error) {
+    alert('Сервермен байланыс жоқ — FastAPI іске қосулы тұр ма?');
+    setDocxStatus('');
+  }
+}
+
   function handleSwap() {
     const newDir = direction === 'cyr2tote' ? 'tote2cyr' : 'cyr2tote';
     setDirection(newDir);
@@ -263,10 +310,12 @@ async function handleFileConvert(e) {
 
 {/* Файл конвертер — тек тіркелген пайдаланушы */}
 {user && (
-  <div className="mt-6 w-full max-w-4xl">
+  <div className="mt-6 w-full max-w-4xl space-y-3">
+    
+    {/* .txt файл конвертері — Free */}
     <div className="border border-[#2a4f8a] rounded-xl p-4 bg-[#1B3A6B]">
       <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-3 font-medium">
-        .txt файл конвертері
+        .txt файл конвертері <span className="text-[#4a6fa5] normal-case tracking-normal ml-2">Free · 500 KB</span>
       </p>
       <div className="flex items-center gap-3">
         <input
@@ -300,6 +349,28 @@ async function handleFileConvert(e) {
         <p className="text-green-400 text-xs mt-2">✓ Файл сәтті түрлендірілді!</p>
       )}
     </div>
+
+    {/* .docx файл конвертері — Premium */}
+    <div className="border border-[#C9A84C] rounded-xl p-4 bg-[#1B3A6B]">
+      <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-3 font-medium">
+        .docx файл конвертері <span className="text-[#C9A84C] normal-case tracking-normal ml-2">Premium · 10 MB</span>
+      </p>
+      <div className="flex items-center gap-3">
+        <input
+          type="file"
+          accept=".docx"
+          onChange={handleDocxConvert}
+          className="text-sm text-white file:mr-3 file:py-1.5 file:px-4 
+                     file:rounded-full file:border-0 file:text-sm file:font-medium
+                     file:bg-[#C9A84C] file:text-[#0F2347] hover:file:bg-[#e0bc5e]
+                     cursor-pointer"
+        />
+      </div>
+      {docxStatus && (
+        <p className="text-green-400 text-xs mt-2">{docxStatus}</p>
+      )}
+    </div>
+
   </div>
 )}
 
