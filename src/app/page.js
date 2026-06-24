@@ -13,7 +13,8 @@ export default function Home() {
   const [direction, setDirection] = useState('cyr2tote');
   const [charCount, setCharCount] = useState(0);
   const [user, setUser] = useState(null);
-
+  const [userPlan, setUserPlan] = useState('free');
+  
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -25,6 +26,22 @@ export default function Home() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+
+useEffect(() => {
+  if (user) {
+    supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setUserPlan(data.plan);
+      });
+  }
+}, [user]);
+
+
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -350,26 +367,37 @@ async function handleFileConvert(e) {
       )}
     </div>
 
-    {/* .docx файл конвертері — Premium */}
-    <div className="border border-[#C9A84C] rounded-xl p-4 bg-[#1B3A6B]">
-      <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-3 font-medium">
-        .docx файл конвертері <span className="text-[#C9A84C] normal-case tracking-normal ml-2">Premium · 10 MB</span>
-      </p>
-      <div className="flex items-center gap-3">
-        <input
-          type="file"
-          accept=".docx"
-          onChange={handleDocxConvert}
-          className="text-sm text-white file:mr-3 file:py-1.5 file:px-4 
-                     file:rounded-full file:border-0 file:text-sm file:font-medium
-                     file:bg-[#C9A84C] file:text-[#0F2347] hover:file:bg-[#e0bc5e]
-                     cursor-pointer"
-        />
-      </div>
-      {docxStatus && (
-        <p className="text-green-400 text-xs mt-2">{docxStatus}</p>
-      )}
+  {/* .docx файл конвертері — Premium */}
+{userPlan === 'premium' ? (
+  <div className="border border-[#C9A84C] rounded-xl p-4 bg-[#1B3A6B]">
+    <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-3 font-medium">
+      .docx файл конвертері <span className="text-[#C9A84C] normal-case tracking-normal ml-2">Premium · 10 MB</span>
+    </p>
+    <div className="flex items-center gap-3">
+      <input
+        type="file"
+        accept=".docx"
+        onChange={handleDocxConvert}
+        className="text-sm text-white file:mr-3 file:py-1.5 file:px-4 
+                   file:rounded-full file:border-0 file:text-sm file:font-medium
+                   file:bg-[#C9A84C] file:text-[#0F2347] hover:file:bg-[#e0bc5e]
+                   cursor-pointer"
+      />
     </div>
+    {docxStatus && (
+      <p className="text-green-400 text-xs mt-2">{docxStatus}</p>
+    )}
+  </div>
+) : (
+  <div className="border border-[#2a4f8a] rounded-xl p-4 bg-[#1B3A6B] opacity-60">
+    <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-1 font-medium">
+      .docx файл конвертері
+    </p>
+    <p className="text-[#4a6fa5] text-xs">
+      🔒 Бұл мүмкіндік Premium жазылымшыларға ғана қолжетімді
+    </p>
+  </div>
+)}
 
   </div>
 )}
