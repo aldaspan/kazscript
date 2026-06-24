@@ -389,14 +389,15 @@ async function handleFileConvert(e) {
     )}
   </div>
 ) : (
-  <div className="border border-[#2a4f8a] rounded-xl p-4 bg-[#1B3A6B] opacity-60">
-    <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-1 font-medium">
-      .docx файл конвертері
-    </p>
-    <p className="text-[#4a6fa5] text-xs">
-      🔒 Бұл мүмкіндік Premium жазылымшыларға ғана қолжетімді
-    </p>
-  </div>
+    /* .docx файл конвертері — Premium, жақында */
+    <div className="border border-[#2a4f8a] rounded-xl p-4 bg-[#1B3A6B] opacity-60">
+      <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-1 font-medium">
+        .docx файл конвертері
+      </p>
+      <p className="text-[#4a6fa5] text-xs">
+        🔒 Жақын арада Premium жазылымшыларға қолжетімді болады
+      </p>
+    </div>
 )}
 
   </div>
