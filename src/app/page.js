@@ -261,11 +261,20 @@ async function handleConvert() {
           </div>
           <div className="flex items-center gap-3">
             
-            <a href="/dictionary"
-              className="text-sm text-white hover:text-[#C9A84C] transition-colors hidden sm:block"
+            <a 
+            href="/dictionary"
+              className="text-xs text-white hover:text-[#C9A84C] transition-colors hidden sm:block"
             >
               Сөздік
             </a>
+            {user && (
+              
+              <a href="/my-dictionary"
+                className="text-xs text-white hover:text-[#C9A84C] transition-colors hidden sm:block"
+              >
+                Менің сөздігім
+              </a>
+            )}
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="text-[#C9A84C] text-xs hidden sm:block">{user.email}</span>

@@ -86,3 +86,54 @@ export async function getConversionHistory(userId) {
   }
   return data || [];
 }
+
+/**
+ * Жеке сөздікке жұп қосу
+ */
+export async function addToPersonalDictionary(userId, cyrillic, arabic, note = '') {
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from('personal_dictionary')
+    .upsert(
+      { user_id: userId, cyrillic, arabic, note },
+      { onConflict: 'user_id,cyrillic' }
+    );
+
+  if (error) console.error('addToPersonalDictionary қатесі:', JSON.stringify(error));
+  return data;
+}
+
+/**
+ * Жеке сөздікті алу
+ */
+export async function getPersonalDictionary(userId) {
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from('personal_dictionary')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('getPersonalDictionary қатесі:', JSON.stringify(error));
+    return [];
+  }
+  return data || [];
+}
+
+/**
+ * Жеке сөздіктен жұп өшіру
+ */
+export async function deleteFromPersonalDictionary(userId, id) {
+  if (!userId) return;
+
+  const { error } = await supabase
+    .from('personal_dictionary')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) console.error('deleteFromPersonalDictionary қатесі:', JSON.stringify(error));
+}
