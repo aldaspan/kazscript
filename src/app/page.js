@@ -338,8 +338,7 @@ async function handleConvert() {
               value={inputText}
               onChange={handleInput}
               placeholder={isCyr2Tote ? 'Қазақша мәтін енгізіңіз...' : 'Төте жазу мәтінін енгізіңіз...'}
-              className="w-full min-h-48 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-xl p-4 resize-none overflow-hidden focus:outline-none focus:border-[#C9A84C] transition-colors text-base leading-relaxed"
-              dir={isCyr2Tote ? 'ltr' : 'rtl'}
+              className="w-full min-h-48 max-h-96 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-xl p-4 resize-none overflow-y-auto focus:outline-none focus:border-[#C9A84C] transition-colors text-base leading-relaxed"              dir={isCyr2Tote ? 'ltr' : 'rtl'}
               style={!isCyr2Tote ? { fontFamily: 'AlkatipBasma', fontSize: '20px' } : {}}
             />
             <div className="flex justify-between items-center mt-2">
@@ -360,8 +359,7 @@ async function handleConvert() {
             value={outputText}
             readOnly
             placeholder={isCyr2Tote ? '...ناتيجە وسىندا شىعادى' : 'Нәтиже осында шығады...'}
-            className="w-full min-h-48 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-xl p-4 resize-none overflow-y-auto focus:outline-none focus:border-[#C9A84C] transition-colors text-base leading-relaxed"
-            dir={isCyr2Tote ? 'rtl' : 'ltr'}
+            className="w-full min-h-48 max-h-96 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-xl p-4 resize-none overflow-y-auto focus:outline-none focus:border-[#C9A84C] transition-colors text-base leading-relaxed"            dir={isCyr2Tote ? 'rtl' : 'ltr'}
             style={isCyr2Tote ? { fontFamily: 'AlkatipBasma', fontSize: '20px' } : {}}
           />
             <div className="flex justify-end mt-2">
