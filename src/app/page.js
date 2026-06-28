@@ -91,15 +91,23 @@ export default function Home() {
       setOutputText(result);
       saveConversionHistory(user?.id, text, result, 'cyr2tote');
     } else {
-      const words = text.trim().split(/\s+/);
-      const converted = await Promise.all(
-        words.map(async word => {
-          const supabaseLookup = await lookupPairFromSupabase(word);
-          if (supabaseLookup) return supabaseLookup;
-          const localLookup = lookupPair(word);
-          return localLookup || toteToCyrillic(word);
-        })
-      );
+        const words = text.trim().split(/\s+/);
+        const converted = await Promise.all(
+          words.map(async word => {
+            // Тыныс белгілерін алып тастап іздейміз
+            const punctuation = word.match(/[؟،؛?!,;.]+$/)?.[0] || '';
+            const cleanWord = word.replace(/[؟،؛?!,;.]+$/, '');
+            const convertedPunct = punctuation
+              .replace(/؟/g, '?')
+              .replace(/،/g, ',')
+              .replace(/؛/g, ';');
+
+            const supabaseLookup = await lookupPairFromSupabase(cleanWord);
+            if (supabaseLookup) return supabaseLookup + convertedPunct;
+            const localLookup = lookupPair(cleanWord);
+            return (localLookup || toteToCyrillic(cleanWord)) + convertedPunct;
+          })
+        );
       let result = converted.join(' ').trimStart();
       result = result.charAt(0).toUpperCase() + result.slice(1);
       result = result.replace(/([.!?]\s+|\n)([а-яәіңғүұқөһ])/gu,
