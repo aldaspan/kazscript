@@ -91,7 +91,7 @@ export function cyrillicToTote(text) {
   if (!text) return '';
 
   const lower = text.toLowerCase();
-const prepared = splitUlyQyzy(lower);
+  const prepared = splitUlyQyzy(lower).replace(/ия/g, 'я');
   return prepared
     .split(/(\s+)/)
     .map(token => {
