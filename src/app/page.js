@@ -259,7 +259,13 @@ async function handleConvert() {
               <p className="text-[#C9A84C] text-xs tracking-widest uppercase">Жазу мұрасы</p>
             </div>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
+            
+            <a href="/dictionary"
+              className="text-sm text-white hover:text-[#C9A84C] transition-colors hidden sm:block"
+            >
+              Сөздік
+            </a>
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="text-[#C9A84C] text-xs hidden sm:block">{user.email}</span>
@@ -279,6 +285,8 @@ async function handleConvert() {
               </a>
             )}
           </div>
+
+          
         </div>
       </header>
 
