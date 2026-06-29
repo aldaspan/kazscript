@@ -137,3 +137,21 @@ export async function deleteFromPersonalDictionary(userId, id) {
 
   if (error) console.error('deleteFromPersonalDictionary қатесі:', JSON.stringify(error));
 }
+
+/**
+ * Қате хабарлау
+ */
+export async function reportError(userId, inputText, outputText, wrongWord, correctWord, direction) {
+  const { error } = await supabase
+    .from('error_reports')
+    .insert({
+      user_id: userId || null,
+      input_text: inputText,
+      output_text: outputText,
+      wrong_word: wrongWord,
+      correct_word: correctWord,
+      direction: direction,
+    });
+
+  if (error) console.error('reportError қатесі:', JSON.stringify(error));
+}

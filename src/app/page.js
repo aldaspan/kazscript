@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { cyrillicToTote, toteToCyrillic, countChars, savePair, lookupPair } from '@/lib/converter';
-import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, saveConversionHistory, supabase } from '@/lib/supabase';
+import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, saveConversionHistory, reportError, supabase } from '@/lib/supabase';
 
 const GUEST_MAX_CHARS = 5000;
 const FREE_MAX_CHARS = 10000;
@@ -19,6 +19,10 @@ export default function Home() {
   const [charWarning, setCharWarning] = useState('');
   const [fileResult, setFileResult] = useState('');
   const [docxStatus, setDocxStatus] = useState('');
+  const [showErrorForm, setShowErrorForm] = useState(false);
+  const [wrongWord, setWrongWord] = useState('');
+  const [correctWord, setCorrectWord] = useState('');
+  const [errorSent, setErrorSent] = useState(false);
   const inputRef = useRef(null);
   const outputRef = useRef(null);
   const debounceRef = useRef(null);
@@ -176,6 +180,25 @@ async function handleConvert() {
     await navigator.clipboard.writeText(outputText);
     setCopyStatus('Көшірілді!');
     setTimeout(() => setCopyStatus(''), 2000);
+  }
+
+  async function handleReportError() {
+    if (!wrongWord.trim()) return;
+    await reportError(
+      user?.id,
+      inputText,
+      outputText,
+      wrongWord.trim(),
+      correctWord.trim(),
+      direction
+    );
+    setErrorSent(true);
+    setWrongWord('');
+    setCorrectWord('');
+    setTimeout(() => {
+      setErrorSent(false);
+      setShowErrorForm(false);
+    }, 3000);
   }
 
   async function handleFileConvert(e) {
@@ -387,16 +410,68 @@ async function handleConvert() {
             className="w-full min-h-48 max-h-96 bg-[#1B3A6B] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-xl p-4 resize-none overflow-y-auto focus:outline-none focus:border-[#C9A84C] transition-colors text-base leading-relaxed"            dir={isCyr2Tote ? 'rtl' : 'ltr'}
             style={isCyr2Tote ? { fontFamily: 'AlkatipBasma', fontSize: '20px' } : {}}
           />
-            <div className="flex justify-end mt-2">
-              {outputText && (
+          <div className="flex justify-end gap-2 mt-2">
+            {outputText && (
+              <>
                 <button
                   onClick={handleCopy}
                   className={`text-xs px-3 py-1 rounded-full border transition-all duration-200 ${copyStatus ? 'text-green-400 border-green-400' : 'text-[#C9A84C] border-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0F2347]'}`}
                 >
                   {copyStatus ? copyStatus : 'Көшіру'}
                 </button>
+                <button
+                  onClick={() => setShowErrorForm(!showErrorForm)}
+                  className="text-xs px-3 py-1 rounded-full border border-[#2a4f8a] text-[#4a6fa5] hover:border-red-400 hover:text-red-400 transition-all duration-200"
+                >
+                  Қате бар
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Қате хабарлау формасы */}
+          {showErrorForm && outputText && (
+            <div className="mt-3 bg-[#1B3A6B] border border-[#2a4f8a] rounded-xl p-4">
+              {errorSent ? (
+                <p className="text-green-400 text-xs text-center">✓ Қате хабарланды! Рахмет!</p>
+              ) : (
+                <>
+                  <p className="text-[#C9A84C] text-xs uppercase tracking-widest mb-3 font-medium">Қате хабарлау</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={wrongWord}
+                      onChange={e => setWrongWord(e.target.value)}
+                      placeholder="Қате сөз..."
+                      className="bg-[#0F2347] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#C9A84C]"
+                    />
+                    <input
+                      type="text"
+                      value={correctWord}
+                      onChange={e => setCorrectWord(e.target.value)}
+                      placeholder="Дұрыс нұсқасы..."
+                      className="bg-[#0F2347] text-white placeholder-[#4a6fa5] border border-[#2a4f8a] rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#C9A84C]"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowErrorForm(false)}
+                      className="text-xs text-[#4a6fa5] px-3 py-1.5 rounded-lg hover:text-white transition-colors"
+                    >
+                      Болдырмау
+                    </button>
+                    <button
+                      onClick={handleReportError}
+                      disabled={!wrongWord.trim()}
+                      className="text-xs bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition-colors"
+                    >
+                      Жіберу
+                    </button>
+                  </div>
+                </>
               )}
             </div>
+          )}
           </div>
         </div>
 
