@@ -359,23 +359,7 @@ async function handleConvert() {
       {/* НЕГІЗГІ МАЗМҰН */}
       <main className="flex-1 flex flex-col items-center px-4 py-8">
 
-      {/* Бағыт таңдау */}
-      <div className="flex items-center gap-4 w-full max-w-5xl mb-4">
-        <span className="text-white font-medium text-sm">
-          {isCyr2Tote ? 'Кириллица' : 'Төте жазу'}
-        </span>
-        <button
-          onClick={handleSwap}
-          className="bg-[#1B3A6B] hover:bg-[#C9A84C] text-white hover:text-[#0F2347] border border-[#C9A84C] rounded-full px-4 py-1.5 text-sm transition-all duration-200 font-medium"
-        >
-          ⇄ Ауыстыру
-        </button>
-        <span className="text-white font-medium text-sm">
-          {isCyr2Tote ? 'Төте жазу' : 'Кириллица'}
-        </span>
-      </div>
-
-      {/* Түрлендіру батырмасы — sticky */}
+ {/* Түрлендіру батырмасы — sticky */}
       <div className="sticky top-0 z-10 w-full bg-[#0F2347] border-b border-[#1B3A6B] py-3 flex justify-center mb-4">
         <button
           onClick={handleConvert}
@@ -396,17 +380,48 @@ async function handleConvert() {
         </button>
       </div>
 
+      {/* Бағыт таңдау — Google Translate стилі */}
+      <div className="w-full max-w-5xl mb-4">
+        <div className="flex items-center bg-[#1B3A6B] border border-[#2a4f8a] rounded-xl overflow-hidden">
+          
+          {/* Сол жақ тіл */}
+          <button
+            onClick={() => direction === 'tote2cyr' && setDirection('cyr2tote')}
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-200 text-center
+              ${direction === 'cyr2tote' ? 'text-[#C9A84C] border-b-2 border-[#C9A84C]' : 'text-[#4a6fa5] hover:text-white'}`}
+          >
+            Кириллица
+          </button>
 
-        
+          {/* Ауыстыру батырмасы */}
+          <button
+            onClick={() => setDirection(direction === 'cyr2tote' ? 'tote2cyr' : 'cyr2tote')}
+            className="px-4 py-3 text-white hover:text-[#C9A84C] transition-colors border-x border-[#2a4f8a]"
+          >
+            ⇄
+          </button>
 
+          {/* Оң жақ тіл */}
+          <button
+            onClick={() => direction === 'cyr2tote' && setDirection('tote2cyr')}
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-200 text-center
+              ${direction === 'tote2cyr' ? 'text-[#C9A84C] border-b-2 border-[#C9A84C]' : 'text-[#4a6fa5] hover:text-white'}`}
+          >
+            Төте жазу
+          </button>
+
+        </div>
+      </div>
+
+  
         {/* Textarea аймағы */}
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4">
 
           {/* Кіріс */}
           <div className="flex flex-col">
-            <label className="text-[#C9A84C] text-xs uppercase tracking-widest mb-2 font-medium">
+            {/* <label className="text-[#C9A84C] text-xs uppercase tracking-widest mb-2 font-medium">
               {isCyr2Tote ? 'Кириллица' : 'Төте жазу'}
-            </label>
+            </label> */}
             <textarea
               ref={inputRef}
               value={inputText}
@@ -425,9 +440,9 @@ async function handleConvert() {
 
           {/* Шығыс */}
           <div className="flex flex-col">
-            <label className="text-[#C9A84C] text-xs uppercase tracking-widest mb-2 font-medium">
+            {/* <label className="text-[#C9A84C] text-xs uppercase tracking-widest mb-2 font-medium">
               {isCyr2Tote ? 'Төте жазу' : 'Кириллица'}
-            </label>
+            </label> */}
           <textarea
             ref={outputRef}
             value={outputText}
@@ -553,6 +568,33 @@ async function handleConvert() {
         )}
 
       </main>
+
+{/* FOOTER */}
+<footer className="w-full bg-[#0A0A0A] border-t border-[#1B3A6B] px-4 py-6 mt-8">
+  <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="flex items-center gap-3">
+      <img src="/logo.svg" alt="KazScript" className="w-8 h-8" />
+      <div>
+        <p className="text-white text-sm font-bold">KazScript</p>
+        <p className="text-[#4a6fa5] text-xs">v1.0 · 2025</p>
+      </div>
     </div>
+    <div className="flex flex-col sm:flex-row items-center gap-4 text-xs text-[#4a6fa5]">
+      <a href="/dictionary" className="hover:text-[#C9A84C] transition-colors">Сөздік</a>
+      <a href="https://github.com/aldaspan/kazscript" target="_blank" className="hover:text-[#C9A84C] transition-colors">GitHub</a>
+      <a href="mailto:translitkz@gmail.com" className="hover:text-[#C9A84C] transition-colors">Байланыс</a>
+      <a 
+        href="https://kaspi.kz/pay" 
+        target="_blank"
+        className="text-[#C9A84C] border border-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0F2347] px-3 py-1 rounded-full transition-colors"
+      >
+        ☕ Кофе сатып ал
+      </a>
+    </div>
+    <p className="text-[#4a6fa5] text-xs">© 2025 KazScript. MIT License</p>
+  </div>
+</footer>      
+    </div>
+  
   );
 }

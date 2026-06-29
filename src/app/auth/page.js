@@ -59,7 +59,7 @@ export default function AuthPage() {
               },
             },
           }}
-          providers={[]}
+          providers={['google']}
         />
       </div>
     </main>
