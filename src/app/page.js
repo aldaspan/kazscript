@@ -55,6 +55,24 @@ export default function Home() {
     setUser(null);
   }
 
+async function handleUpgrade() {
+  try {
+    const response = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, email: user.email }),
+    });
+    const { url, error } = await response.json();
+    if (error) {
+      alert('Қате: ' + error);
+      return;
+    }
+    window.location.href = url;
+  } catch (error) {
+    alert('Сервермен байланыс жоқ');
+  }
+}
+
   function autoResize(ref) {
     if (ref.current) {
       ref.current.style.height = 'auto';
@@ -309,6 +327,14 @@ async function handleConvert() {
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="text-[#C9A84C] text-xs hidden sm:block">{user.email}</span>
+                {userPlan === 'free' && (
+                  <button
+                    onClick={handleUpgrade}
+                    className="text-xs text-[#0F2347] bg-[#C9A84C] hover:bg-[#e0bc5e] px-3 py-1.5 rounded-full transition-colors font-medium"
+                  >
+                    Premium ⭐
+                  </button>
+                )}
                 <button
                   onClick={handleSignOut}
                   className="text-xs text-white border border-[#2a4f8a] hover:border-[#C9A84C] px-3 py-1.5 rounded-full transition-colors"
