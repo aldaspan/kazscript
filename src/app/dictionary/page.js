@@ -4,12 +4,53 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function DictionaryPage() {
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);  
   const [pairs, setPairs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const PAGE_SIZE = 50;
+
+const [editingId, setEditingId] = useState(null);
+const [editCyrillic, setEditCyrillic] = useState('');
+const [editArabic, setEditArabic] = useState('');
+
+function startEdit(pair) {
+  setEditingId(pair.id);
+  setEditCyrillic(pair.cyrillic);
+  setEditArabic(pair.arabic);
+}
+
+function cancelEdit() {
+  setEditingId(null);
+}
+
+async function saveEdit(id) {
+  await handleUpdatePair(id, editCyrillic, editArabic);
+  setEditingId(null);
+}
+
+
+  useEffect(() => {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setUser(session?.user ?? null);
+  });
+}, []);
+
+useEffect(() => {
+  if (user) {
+    supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.plan === 'admin') setIsAdmin(true);
+      });
+  }
+}, [user]);
 
   useEffect(() => {
     fetchPairs();
@@ -36,6 +77,21 @@ export default function DictionaryPage() {
     }
     setLoading(false);
   }
+
+  async function handleDeletePair(id) {
+  if (!confirm('Бұл жұпты өшіруге сенімдісің бе?')) return;
+  await supabase.from('word_pairs').delete().eq('id', id);
+  setPairs(pairs.filter(p => p.id !== id));
+}
+
+async function handleUpdatePair(id, newCyrillic, newArabic) {
+  await supabase
+    .from('word_pairs')
+    .update({ cyrillic: newCyrillic, arabic: newArabic })
+    .eq('id', id);
+  setPairs(pairs.map(p => p.id === id ? { ...p, cyrillic: newCyrillic, arabic: newArabic } : p));
+}
+
 
   return (
     <div className="min-h-screen bg-[#0F2347]">
@@ -90,24 +146,55 @@ export default function DictionaryPage() {
         ) : (
           <>
             <div className="border border-[#1B3A6B] rounded-xl overflow-hidden">
-              <div className="grid grid-cols-2 bg-[#1B3A6B] px-4 py-3">
-                <span className="text-[#C9A84C] text-xs uppercase tracking-widest font-medium">Кириллица</span>
-                <span className="text-[#C9A84C] text-xs uppercase tracking-widest font-medium text-right">Төте жазу</span>
+              <div className={`grid ${isAdmin ? 'grid-cols-5' : 'grid-cols-2'} bg-[#1B3A6B] px-4 py-3`}>
+                <span className="text-[#C9A84C] text-xs uppercase tracking-widest font-medium col-span-2">Кириллица</span>
+                <span className="text-[#C9A84C] text-xs uppercase tracking-widest font-medium col-span-2 text-right">Төте жазу</span>
+                {isAdmin && <span></span>}
               </div>
-              {pairs.length === 0 ? (
+              {
+              pairs.length === 0 ? (
                 <div className="text-center text-[#4a6fa5] py-8">Сөз табылмады</div>
               ) : (
-                pairs.map((pair, i) => (
-                  <div
-                    key={pair.id}
-                    className={`grid grid-cols-2 px-4 py-3 border-t border-[#1B3A6B] ${i % 2 === 0 ? 'bg-[#0F2347]' : 'bg-[#1B3A6B]/30'}`}
-                  >
-                    <span className="text-white text-sm">{pair.cyrillic}</span>
-                    <span className="text-white text-sm text-right" style={{ fontFamily: 'AlkatipBasma', fontSize: '16px' }}>
-                      {pair.arabic}
-                    </span>
-                  </div>
-                ))
+              pairs.map((pair, i) => (
+                <div
+                  key={pair.id}
+                  className={`grid ${isAdmin ? 'grid-cols-5' : 'grid-cols-2'} px-4 py-3 border-t border-[#1B3A6B] items-center ${i % 2 === 0 ? 'bg-[#0F2347]' : 'bg-[#1B3A6B]/30'}`}
+                >
+                  {editingId === pair.id ? (
+                    <>
+                      <input
+                        value={editCyrillic}
+                        onChange={e => setEditCyrillic(e.target.value)}
+                        className="col-span-2 bg-[#1B3A6B] text-white border border-[#2a4f8a] rounded px-2 py-1 text-sm"
+                      />
+                      <input
+                        value={editArabic}
+                        onChange={e => setEditArabic(e.target.value)}
+                        dir="rtl"
+                        style={{ fontFamily: 'AlkatipBasma' }}
+                        className="col-span-2 bg-[#1B3A6B] text-white border border-[#2a4f8a] rounded px-2 py-1 text-sm text-right"
+                      />
+                      <div className="flex gap-1 justify-end">
+                        <button onClick={() => saveEdit(pair.id)} className="text-green-400 text-xs px-2">✓</button>
+                        <button onClick={cancelEdit} className="text-red-400 text-xs px-2">✕</button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-white text-sm col-span-2">{pair.cyrillic}</span>
+                      <span className="text-white text-sm col-span-2 text-right" style={{ fontFamily: 'AlkatipBasma', fontSize: '16px' }}>
+                        {pair.arabic}
+                      </span>
+                      {isAdmin && (
+                        <div className="flex gap-2 justify-end">
+                          <button onClick={() => startEdit(pair)} className="text-[#C9A84C] text-xs hover:text-white transition-colors">✎</button>
+                          <button onClick={() => handleDeletePair(pair.id)} className="text-red-400 text-xs hover:text-red-300 transition-colors">✕</button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))
               )}
             </div>
 
