@@ -34,7 +34,11 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (user) checkAdmin();
+    if (user) {
+      checkAdmin();
+    } else if (user === null) {
+      setLoading(false);
+    }
   }, [user]);
 
   async function checkAdmin() {
