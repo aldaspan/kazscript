@@ -305,7 +305,12 @@ async function handleConvert() {
             <img src="/logo.svg" alt="KazScript" className="w-10 h-10" />
             <div>
               <h1 className="text-white font-bold text-lg leading-none">KazScript</h1>
-              <p className="text-[#C9A84C] text-xs tracking-widest uppercase">Жазу мұрасы</p>
+                <p className="text-[#C9A84C] text-xs tracking-widest uppercase flex items-center gap-2">
+                  Жазу мұрасы
+                  <span className="bg-[#C9A84C]/20 text-[#C9A84C] text-[10px] px-1.5 py-0.5 rounded normal-case tracking-normal font-medium">
+                    Beta
+                  </span>
+                </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
