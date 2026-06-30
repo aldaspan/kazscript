@@ -584,11 +584,11 @@ async function handleConvert() {
       <a href="https://github.com/aldaspan/kazscript" target="_blank" className="hover:text-[#C9A84C] transition-colors">GitHub</a>
       <a href="mailto:translitkz@gmail.com" className="hover:text-[#C9A84C] transition-colors">Байланыс</a>
       <a 
-        href="https://kaspi.kz/pay" 
+        href="https://pay.kaspi.kz/pay/2jdtf9vw" 
         target="_blank"
         className="text-[#C9A84C] border border-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0F2347] px-3 py-1 rounded-full transition-colors"
       >
-        ☕ Кофе сатып ал
+        ☕ Жобаға қолдау көрсету
       </a>
     </div>
     <p className="text-[#4a6fa5] text-xs">© 2025 KazScript. MIT License</p>
