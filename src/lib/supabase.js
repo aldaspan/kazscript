@@ -155,3 +155,20 @@ export async function reportError(userId, inputText, outputText, wrongWord, corr
 
   if (error) console.error('reportError қатесі:', JSON.stringify(error));
 }
+
+/**
+ * Жеке сөздіктен төте жазу сөзін іздейді
+ */
+export async function lookupPersonalDictionary(userId, arabicWord) {
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from('personal_dictionary')
+    .select('cyrillic')
+    .eq('user_id', userId)
+    .eq('arabic', arabicWord)
+    .single();
+
+  if (error) return null;
+  return data?.cyrillic || null;
+}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { cyrillicToTote, toteToCyrillic, countChars, savePair, lookupPair } from '@/lib/converter';
-import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, saveConversionHistory, reportError, supabase } from '@/lib/supabase';
+import { savePairToSupabase, savePairsBatch, lookupPairFromSupabase, lookupPersonalDictionary, saveConversionHistory, reportError, supabase } from '@/lib/supabase';
 
 const GUEST_MAX_CHARS = 5000;
 const FREE_MAX_CHARS = 10000;
@@ -113,10 +113,9 @@ async function handleUpgrade() {
       setOutputText(result);
       saveConversionHistory(user?.id, text, result, 'cyr2tote');
     } else {
-        const words = text.trim().split(/\s+/);
+       const words = text.trim().split(/\s+/);
         const converted = await Promise.all(
           words.map(async word => {
-            // Тыныс белгілерін алып тастап іздейміз
             const punctuation = word.match(/[؟،؛?!,;.]+$/)?.[0] || '';
             const cleanWord = word.replace(/[؟،؛?!,;.]+$/, '');
             const convertedPunct = punctuation
@@ -124,8 +123,17 @@ async function handleUpgrade() {
               .replace(/،/g, ',')
               .replace(/؛/g, ';');
 
+            // 1. Жеке сөздік — ең жоғары басымдық
+            if (user?.id) {
+              const personalLookup = await lookupPersonalDictionary(user.id, cleanWord);
+              if (personalLookup) return personalLookup + convertedPunct;
+            }
+
+            // 2. Жалпы сөздік
             const supabaseLookup = await lookupPairFromSupabase(cleanWord);
             if (supabaseLookup) return supabaseLookup + convertedPunct;
+
+            // 3. localStorage
             const localLookup = lookupPair(cleanWord);
             return (localLookup || toteToCyrillic(cleanWord)) + convertedPunct;
           })
